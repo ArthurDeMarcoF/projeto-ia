@@ -31,13 +31,13 @@ O glossário será atualizado de forma cumulativa ao longo das Sprints.
 
 ## 🚀 Sprints e Evolução
 
-* [X] **Sprint 0:** Preparação do ambiente (Python, PyTorch e Git), criação e organização do repositório.
-* [X] **Sprint 1:** Introdução aos LLMs, Glossário do Capítulo 1 e arquitetura geral dos modelos GPT.
-* [ ] **Sprint 2:** Tokenização, vocabulário, Token IDs, Embeddings e preparação dos dados (Capítulo 2).
-* [ ] **Sprint 3:** Mecanismos de Attention (Self-Attention, Causal Attention e Multi-Head Attention) (Capítulo 3).
-* [ ] **Sprint 4:** Arquitetura GPT e Transformer Blocks (Capítulo 4).
-* [ ] **Sprint 5:** Treinamento do modelo, função de perda e otimizadores (Capítulo 5).
-* [ ] **Sprint 6:** Fine-Tuning e adaptação para tarefas específicas (Capítulos 6 e 7).
+- [X] **Sprint 0:** Preparação do ambiente (Python, PyTorch e Git), criação e organização do repositório.
+- [X] **Sprint 1:** Introdução aos LLMs, Glossário do Capítulo 1 e arquitetura geral dos modelos GPT.
+- [ ] **Sprint 2:** Tokenização, vocabulário, Token IDs, Embeddings e preparação dos dados (Capítulo 2).
+- [ ] **Sprint 3:** Mecanismos de Attention (Self-Attention, Causal Attention e Multi-Head Attention) (Capítulo 3).
+- [ ] **Sprint 4:** Arquitetura GPT e Transformer Blocks (Capítulo 4).
+- [ ] **Sprint 5:** Treinamento do modelo, função de perda e otimizadores (Capítulo 5).
+- [ ] **Sprint 6:** Fine-Tuning e adaptação para tarefas específicas (Capítulos 6 e 7).
 
 ## 🛠️ Tecnologias e Ambiente
 
