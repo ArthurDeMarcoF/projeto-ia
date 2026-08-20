@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 # Glossário Técnico — Projeto LLM
 
@@ -13,6 +14,22 @@ Este glossário reúne, de forma cumulativa, os principais conceitos estudados d
 
 ## Capítulo 1 — Understanding Large Language Models
 
+=======
+# Glossário Técnico — Projeto LLM
+
+## Capítulo 1 — Understanding Large Language Models
+
+**Componente curricular:** Inteligência Artificial e Sistemas Inteligentes  
+**Curso:** Engenharia da Computação — UNOESC  
+**Professor:** Kleyton Hoffmann  
+**Acadêmicos:** Arthur de Marco e Lucas Zamoner  
+**Ano:** 2026
+
+Conceitos fundamentais sobre Grandes Modelos de Linguagem.
+
+---
+
+>>>>>>> 815cb78e9f5288dbd05b1149dcb7434949d60c8d
 ### Ajuste Fino de Instruções (Instruct Tuning)
 
 Processo de treinamento adicional em que um modelo pré-treinado é refinado em conjuntos de dados formatados especificamente para aprender a seguir as instruções (prompts) fornecidas pelo usuário de forma mais eficaz.
@@ -99,4 +116,8 @@ Frações de sequências de caracteres obtidas após a quebra de um documento pe
 
 ---
 
+<<<<<<< HEAD
 > Este glossário é cumulativo. Os conceitos dos próximos capítulos serão adicionados a este mesmo documento ao longo das Sprints do Projeto LLM.
+=======
+> Este glossário é cumulativo e será atualizado ao longo das próximas Sprints do Projeto LLM.
+>>>>>>> 815cb78e9f5288dbd05b1149dcb7434949d60c8d
