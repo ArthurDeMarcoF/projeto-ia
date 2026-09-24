@@ -3,3 +3,4 @@ tiktoken
 numpy
 pytest
 jupyter
+matplotlib
