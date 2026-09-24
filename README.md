@@ -23,18 +23,22 @@ Para manter a organização e acompanhar a evolução do projeto, os artefatos e
 * `/docs`: Documentação do projeto, incluindo o **Glossário Técnico cumulativo**.
 * `/experimentos`: Relatórios, análises de resultados e testes de diferentes configurações e parâmetros.
 
+Na Sprint 3, `src/attention.py` implementa manualmente Self-Attention, Scaled Dot-Product Attention, Causal Attention e Multi-Head Attention. Os experimentos e heatmaps correspondentes estão em `/experimentos`.
+
 ### 📚 Glossário Técnico
 
 O glossário será atualizado de forma cumulativa ao longo das Sprints.
 
 ➡️ [Acessar Glossário Técnico](docs/glossario.md)
 
+➡️ [Revisar Quiz da Sprint 3](docs/quiz_sprint3.md)
+
 ## 🚀 Sprints e Evolução
 
 - [X] **Sprint 0:** Preparação do ambiente (Python, PyTorch e Git), criação e organização do repositório.
 - [X] **Sprint 1:** Introdução aos LLMs, Glossário do Capítulo 1 e arquitetura geral dos modelos GPT.
-- [ ] **Sprint 2:** Tokenização, vocabulário, Token IDs, Embeddings e preparação dos dados (Capítulo 2).
-- [ ] **Sprint 3:** Mecanismos de Attention (Self-Attention, Causal Attention e Multi-Head Attention) (Capítulo 3).
+- [X] **Sprint 2:** Tokenização, vocabulário, Token IDs, Embeddings e preparação dos dados (Capítulo 2).
+- [X] **Sprint 3:** Mecanismos de Attention (Self-Attention, Causal Attention e Multi-Head Attention) (Capítulo 3).
 - [ ] **Sprint 4:** Arquitetura GPT e Transformer Blocks (Capítulo 4).
 - [ ] **Sprint 5:** Treinamento do modelo, função de perda e otimizadores (Capítulo 5).
 - [ ] **Sprint 6:** Fine-Tuning e adaptação para tarefas específicas (Capítulos 6 e 7).

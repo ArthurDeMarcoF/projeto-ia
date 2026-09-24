@@ -1,11 +1,17 @@
-"""Demonstração completa do pipeline da Sprint 2."""
+"""Demonstração do pipeline acumulado das Sprints 2 e 3."""
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import torch
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.attention import MultiHeadAttention
 from src.data import create_dataloader_v1
 from src.embeddings import TokenAndPositionEmbedding
 from src.tokenization import (
@@ -16,7 +22,6 @@ from src.tokenization import (
     tokenize_text,
 )
 
-ROOT = Path(__file__).resolve().parents[1]
 DATA_FILE = ROOT / "data" / "texto_teste.txt"
 
 
@@ -81,9 +86,26 @@ def main() -> None:
         "= [batch_size, context_length, embedding_dim]",
     )
 
+    print("\n=== 6. MULTI-HEAD CAUSAL ATTENTION ===")
+    attention = MultiHeadAttention(
+        d_in=embedding_dim,
+        d_out=embedding_dim,
+        context_length=context_length,
+        dropout=0.0,
+        num_heads=4,
+    )
+    attention_output, attention_weights = attention(
+        embeddings, return_attention_weights=True
+    )
+    print("Attention output shape:", tuple(attention_output.shape), "= [B, T, D]")
+    print("Attention weights shape:", tuple(attention_weights.shape), "= [B, H, T, T]")
+
     print("\nPipeline final:")
-    print("Texto -> Tokens -> Token IDs -> Sequências -> Embeddings -> Positional Embeddings -> Lote")
-    print("Saída pronta para a Sprint 3:", tuple(embeddings.shape))
+    print(
+        "Texto -> Tokens -> Token IDs -> Sequências -> Embeddings -> "
+        "Positional Embeddings -> Multi-Head Causal Attention"
+    )
+    print("Saída pronta para os Transformer Blocks da Sprint 4:", tuple(attention_output.shape))
 
 
 if __name__ == "__main__":
