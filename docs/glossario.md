@@ -130,3 +130,89 @@ Elementos adicionados artificialmente ao vocabulário para sinalizar formataçõ
 ### Vocabulário (Vocabulary)
 
 Dicionário completo e de tamanho fixo gerado pelo tokenizador para indexar e mapear todos os tokens únicos para números inteiros exclusivos. A função do vocabulário no modelo de linguagem é estabelecer o escopo geral de tudo o que a rede consegue compreender, reconhecer e prever na sua camada final de saída. Ele é construído diretamente pelo modelo de BPE e pelo processo de tokenização, definindo o limite de tamanho que pautará as matrizes de embeddings. Computacionalmente, o vocabulário do GPT-2, por exemplo, comporta 50.257 elementos, o que significa que o seu dicionário possui 50.257 chaves associando números inteiros a representações de texto.
+
+## Capítulo 3 — Coding Attention Mechanisms
+
+### Mecanismo de Atenção (Attention Mechanism)
+
+Operação que combina informações de uma sequência atribuindo pesos diferentes aos vetores disponíveis. Para cada token consultando, os pesos determinam quanto cada token observado contribui para seu novo vetor de contexto. A atenção conecta diretamente posições distantes sem exigir o processamento recorrente token a token.
+
+### Autoatenção (Self-Attention)
+
+Caso de atenção em que queries, keys e values são derivados da mesma entrada `X`. Sua função é contextualizar cada token usando os demais tokens da própria sequência. Para uma entrada `[B,T,D]`, a autoatenção produz uma representação contextual para cada uma das `T` posições.
+
+### Consulta (Query — Q)
+
+Projeção aprendível que representa aquilo que uma posição procura nas outras posições. É calculada por `Q = XW_q`. Cada query é comparada com todas as keys para formar uma linha da matriz de scores.
+
+### Chave (Key — K)
+
+Projeção aprendível que representa como cada posição pode ser encontrada por uma query. É calculada por `K = XW_k`. A transposição de K permite comparar cada query com todas as keys por meio de `QKᵀ`.
+
+### Valor (Value — V)
+
+Projeção aprendível que contém a informação efetivamente combinada após o cálculo dos pesos. É calculada por `V = XW_v`. Enquanto Q e K determinam os pesos, V determina o conteúdo do vetor de contexto.
+
+### Score de Atenção (Attention Score)
+
+Valor de compatibilidade obtido pelo produto escalar entre uma query e uma key. Antes do softmax, os scores podem assumir qualquer valor real. A matriz `QKᵀ` possui formato `[B,T,T]`, pois cada uma das `T` queries é comparada com cada uma das `T` keys.
+
+### Peso de Atenção (Attention Weight)
+
+Score transformado pelo softmax em um valor não negativo e normalizado. Cada linha da matriz de pesos soma 1 e descreve a distribuição das contribuições das keys para uma query. Em atenção causal, pesos de posições futuras são zero.
+
+### Vetor de Contexto (Context Vector)
+
+Soma ponderada dos values calculada por `attention_weights @ V`. O vetor resultante reúne as informações acessíveis a uma query segundo seus pesos. Para uma head, o resultado possui formato `[B,T,D_out]`.
+
+### Produto Escalar (Dot Product)
+
+Soma dos produtos entre componentes correspondentes de dois vetores. Na atenção, mede a compatibilidade entre Q e K: valores maiores levam a maior peso relativo após o softmax. Computacionalmente, todos os pares são calculados em paralelo por multiplicação matricial.
+
+### Atenção por Produto Escalar Escalonado (Scaled Dot-Product Attention)
+
+Forma de atenção definida por `softmax(QKᵀ / sqrt(d_k))V`. A divisão por `sqrt(d_k)` controla a magnitude dos scores quando a dimensão das keys cresce, reduzindo a saturação excessiva do softmax e favorecendo gradientes úteis.
+
+### Softmax
+
+Função que converte uma linha de scores em uma distribuição normalizada: aplica a exponencial e divide cada valor pela soma da linha. Na atenção, sua função é produzir pesos não negativos que somam 1. Diferenças muito grandes entre scores geram distribuições mais concentradas.
+
+### Atenção Causal (Causal Attention)
+
+Autoatenção adequada à modelagem autoregressiva, na qual a posição `i` pode consultar somente posições `j <= i`. Sua função no GPT é impedir acesso à informação futura usada como alvo de previsão.
+
+### Máscara Causal (Causal Mask)
+
+Matriz triangular que identifica conexões permitidas e proibidas. Antes do softmax, scores com `j > i` recebem `-inf`; depois da normalização, esses pesos tornam-se zero. Como a máscara não é treinável, pode ser armazenada como buffer do módulo.
+
+### Autoatenção Mascarada (Masked Self-Attention)
+
+Autoatenção na qual uma máscara restringe quais pares de posições podem interagir. No GPT, a máscara é causal, mas outras arquiteturas podem empregar máscaras com finalidades distintas, como ignorar posições de preenchimento.
+
+### Atenção Multi-Head (Multi-Head Attention)
+
+Mecanismo que divide as projeções Q, K e V em várias heads e calcula atenção em paralelo. Após o cálculo independente, os contextos são concatenados e projetados para a dimensão de saída. Durante o treinamento, heads diferentes podem aprender relações em subespaços distintos.
+
+### Head de Atenção (Attention Head)
+
+Uma unidade de atenção com suas próprias fatias de Q, K e V. Seus pesos possuem formato `[B,T,T]`. Na forma vetorizada, as heads aparecem como o eixo H em `[B,H,T,T]`.
+
+### Dimensão da Head (Head Dimension)
+
+Quantidade de componentes processados por head, calculada por `head_dim = d_out / num_heads`. Por isso, `d_out` precisa ser divisível por `num_heads`. Exemplo: `d_out=32` e 4 heads resultam em `head_dim=8`.
+
+### Dropout
+
+Regularização que zera aleatoriamente parte dos pesos durante o treinamento e reescala os valores restantes. Na atenção, reduz a dependência excessiva de conexões específicas. Durante avaliação, o dropout é desativado.
+
+### Projeção de Query (Query Projection)
+
+Camada linear aprendível `W_q` que transforma a entrada em queries. Sua saída mantém os eixos de lote e sequência e substitui a última dimensão: `[B,T,D_in] → [B,T,D_out]`.
+
+### Projeção de Key (Key Projection)
+
+Camada linear aprendível `W_k` que transforma a entrada em keys compatíveis com as queries. Q e K precisam ter a mesma última dimensão para que o produto `QKᵀ` seja definido.
+
+### Projeção de Value (Value Projection)
+
+Camada linear aprendível `W_v` que transforma a entrada nos conteúdos combinados pelos pesos. Depois de `attention_weights @ V`, sua última dimensão determina a dimensão dos vetores de contexto antes da projeção final.
