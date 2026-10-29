@@ -1,4 +1,4 @@
-"""Demonstração do pipeline acumulado das Sprints 2 e 3."""
+"""Demonstração do pipeline acumulado das Sprints 2, 3 e 4."""
 
 from __future__ import annotations
 
@@ -14,6 +14,8 @@ if str(ROOT) not in sys.path:
 from src.attention import MultiHeadAttention
 from src.data import create_dataloader_v1
 from src.embeddings import TokenAndPositionEmbedding
+from src.gpt import GPTModel
+from src.generation import generate_tokens
 from src.tokenization import (
     EOT_TOKEN,
     build_vocabulary,
@@ -103,9 +105,22 @@ def main() -> None:
     print("\nPipeline final:")
     print(
         "Texto -> Tokens -> Token IDs -> Sequências -> Embeddings -> "
-        "Positional Embeddings -> Multi-Head Causal Attention"
+        "Positional Embeddings -> Multi-Head Causal Attention -> Transformer Blocks -> GPT -> Logits -> Geração"
     )
-    print("Saída pronta para os Transformer Blocks da Sprint 4:", tuple(attention_output.shape))
+    print("\n=== 7. MODELO GPT ===")
+    gpt = GPTModel(
+        vocab_size=tokenizer.vocab_size, context_length=context_length,
+        embedding_dim=embedding_dim, num_heads=4, num_layers=2,
+        ff_hidden_dim=64, dropout=0.0,
+    )
+    logits = gpt.eval()(input_batch)
+    print("GPT logits shape:", tuple(logits.shape), "= [B, T, V]")
+
+    print("\n=== 8. GERAÇÃO AUTOREGRESSIVA ===")
+    generated_ids = generate_tokens(gpt, input_batch[:1, :3], max_new_tokens=5)
+    print("Token IDs gerados:", generated_ids.tolist())
+    print("Texto gerado (não treinado):", tokenizer.decode(generated_ids[0].tolist()))
+    print("Os parâmetros da GPT ainda serão treinados na Sprint 5.")
 
 
 if __name__ == "__main__":
