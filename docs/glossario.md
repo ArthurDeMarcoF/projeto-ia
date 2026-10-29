@@ -216,3 +216,65 @@ Camada linear aprendível `W_k` que transforma a entrada em keys compatíveis co
 ### Projeção de Value (Value Projection)
 
 Camada linear aprendível `W_v` que transforma a entrada nos conteúdos combinados pelos pesos. Depois de `attention_weights @ V`, sua última dimensão determina a dimensão dos vetores de contexto antes da projeção final.
+
+## Capítulo 4 — Implementing a GPT Model from Scratch
+
+### Transformer
+
+Arquitetura de rede neural baseada em mecanismos de atenção e camadas de transformação de representações. **Função no GPT:** organiza o processamento paralelo dos tokens durante o forward e a previsão autoregressiva na geração. **Relação:** neste projeto, a variante *decoder-only* combina embeddings da Sprint 2, Multi-Head Causal Attention da Sprint 3 e Transformer Blocks da Sprint 4.
+
+### Transformer Block (Bloco Transformer)
+
+Unidade repetida da arquitetura GPT. **Função:** processar representações contextuais usando atenção causal e FeedForward, com normalização e atalhos residuais. **Relação:** recebe e devolve tensores `[B,T,D]`; o GPT empilha `N` desses blocos para aprofundar o processamento.
+
+### Layer Normalization (LayerNorm / Normalização de Camada)
+
+Operação que normaliza os valores de cada token ao longo de suas `D` características e aplica parâmetros aprendíveis de escala e deslocamento. **Função:** controlar a escala das ativações e favorecer estabilidade no treinamento. **Relação:** a variante *pre-LN* usada aqui aplica LayerNorm antes da atenção e antes da FeedForward, além de uma normalização final após os blocos. Para uma entrada `[B,T,D]`, a saída mantém `[B,T,D]`.
+
+### Pre-LayerNorm (Pre-LN)
+
+Organização na qual cada subcamada recebe a entrada já normalizada, antes de sua conexão residual: `x + subcamada(LayerNorm(x))`. **Função:** facilitar o fluxo de gradientes em arquiteturas profundas. **Relação:** é a ordenação adotada nas duas subcamadas do Transformer Block deste projeto.
+
+### Conexão Residual (Residual / Shortcut Connection)
+
+Soma a entrada original à saída transformada de uma subcamada, exigindo a mesma dimensão. **Função:** preservar informação e fornecer um caminho direto para a propagação de gradientes. **Relação:** no bloco, ocorre após a Multi-Head Attention e novamente após a FeedForward, ambas com formato `[B,T,D]`.
+
+### FeedForward Network (FFN / Rede de Propagação Direta)
+
+Rede de duas projeções lineares com uma função de ativação intermediária. **Função:** transformar as características de cada token individualmente, sem misturar posições da sequência. **Relação:** dentro do bloco, aplica `[B,T,D] -> [B,T,F] -> [B,T,D]`; seu resultado é somado pela segunda conexão residual.
+
+### GELU (Gaussian Error Linear Unit)
+
+Função de ativação não linear e suave aplicada entre as duas projeções da FeedForward. **Função:** permitir transformações expressivas que não seriam possíveis apenas com operações lineares. **Relação:** no projeto é usada a aproximação `nn.GELU(approximate="tanh")` no fluxo `D -> F -> GELU -> D`.
+
+### Dropout (Regularização por Desativação Aleatória)
+
+Técnica que zera aleatoriamente componentes com uma probabilidade durante o treinamento. **Função:** reduzir a dependência do modelo de ativações específicas. **Relação:** aparece na atenção e nas saídas residuais do bloco, além dos embeddings; em `model.eval()` é desativado. É o mesmo princípio já aplicado aos pesos de atenção na Sprint 3.
+
+### Logits
+
+Valores reais não normalizados que representam as pontuações do modelo para cada token do vocabulário. **Função:** fornecer a distribuição de pontuações que será convertida em probabilidades para escolher o próximo token. **Relação:** a Language Model Head produz um tensor `[B,T,V]`; na geração utiliza-se `logits[:, -1, :]` com formato `[B,V]`.
+
+### Language Model Head (LM Head / Camada de Saída do Modelo de Linguagem)
+
+Projeção linear que transforma uma representação de dimensão `D` em `V` pontuações, uma por item do vocabulário. **Função:** conectar a saída do Transformer à previsão de tokens. **Relação:** recebe `[B,T,D]` após LayerNorm final e devolve logits `[B,T,V]`. Seus pesos serão ajustados no treinamento futuro.
+
+### Inferência (Inference)
+
+Execução do modelo para calcular previsões usando parâmetros existentes, sem atualizar pesos. **Função:** produzir logits e escolher tokens. **Relação:** usa `model.eval()` e `torch.inference_mode()` para desativar dropout e impedir construção do grafo de gradientes. Na Sprint 4, os pesos ainda não são treinados.
+
+### Geração Autoregressiva (Autoregressive Generation)
+
+Procedimento que acrescenta um token por vez à sequência de entrada, usando o resultado anterior como contexto para a próxima previsão. **Função:** formar sequências de tokens de comprimento variável. **Relação:** a máscara causal impede acesso ao futuro; o laço repete `contexto -> logits finais -> seleção -> novo contexto`. Se a sequência ultrapassar `context_length`, utiliza-se apenas a janela final.
+
+### Greedy Decoding (Seleção Gulosa)
+
+Estratégia que escolhe o token de maior pontuação/probabilidade (`argmax`) em cada passo. **Função:** gerar uma sequência determinística com o mesmo modelo e contexto em avaliação. **Relação:** utiliza os logits finais; não equivale a buscar a sequência globalmente mais provável.
+
+### Temperatura (Temperature)
+
+Parâmetro positivo que divide os logits antes do softmax. **Função:** controlar o grau de concentração das probabilidades para a amostragem; valores abaixo de 1 tendem a concentrar a distribuição e acima de 1 a torná-la mais uniforme. **Relação:** modifica `softmax(logits / temperatura)` sem alterar os parâmetros do GPT.
+
+### Top-k Sampling (Amostragem Top-k)
+
+Estratégia que mantém apenas os `k` tokens de maior pontuação antes de aplicar o softmax e sortear a próxima escolha. **Função:** limitar as opções de geração. **Relação:** junto com temperatura e `torch.multinomial`, atua sobre a saída `[B,V]` da Language Model Head; `k=1` equivale a selecionar sempre o melhor candidato.
