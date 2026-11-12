@@ -1,0 +1,38 @@
+Experimento A
+Prompt = Um modelo de linguagem
+Novos tokens = 20 | seed = 123
+
+Greedy Decoding
+Um modelo de linguagem vetor janela rede camadas seguinte consiga em determina A ao Em frente mudar Em frente mudar Em frente mudar Em
+
+Temperature Sampling (T=1.2)
+Um modelo de linguagem organiza o dados Esses diferentes resultado Por identidade entre identificador enquanto apenas rede somados da frente Os paralelo posições precisa
+
+Top-k Sampling (k=5, T=1)
+Um modelo de linguagem próximo determina linguagem camada extrair rede quantidade a Na explícita mudar computacional ao Em diretamente Os organizar Em frente carregam
+
+Experimento B
+Prompt = Um modelo de linguagem
+Novos tokens = 20 | seed = 123
+
+Greedy Decoding
+Um modelo de linguagem próximo. da determina Para. da determina Na explícita e. da frente mudar identidade e. da frente
+
+Temperature Sampling (T=1.2)
+Um modelo de linguagem. o dados Esses diferentes resultado Por identidade entre identificador enquanto apenas essa parâmetros da frente Os paralelo posições seguinte
+
+Top-k Sampling (k=5, T=1)
+Um modelo de linguagem próximo determina cada determina neural.. carregar parâmetros ao lotes Antes ao Depois frente frente. mudar convertidos rede
+
+Experimento C
+Prompt = Um modelo de linguagem
+Novos tokens = 20 | seed = 123
+
+Greedy Decoding
+Um modelo de linguagem próximo. padrões camada convertidos quanto cada a Na dados identidade context lotes Antes lotes Antes lotes Antes lotes Antes
+
+Temperature Sampling (T=1.2)
+Um modelo de linguagem. o dados Esses diferentes resultado Por identidade entre identificador enquanto apenas essa parâmetros da frente Os paralelo posições precisa
+
+Top-k Sampling (k=5, T=1)
+Um modelo de linguagem próximo determina linguagem sequências os com Os organizar representa precisa vocabulário posições identidade <|endoftext|> pares lotes organizar contém representa lotes
