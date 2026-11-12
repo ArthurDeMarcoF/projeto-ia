@@ -278,3 +278,105 @@ Parâmetro positivo que divide os logits antes do softmax. **Função:** control
 ### Top-k Sampling (Amostragem Top-k)
 
 Estratégia que mantém apenas os `k` tokens de maior pontuação antes de aplicar o softmax e sortear a próxima escolha. **Função:** limitar as opções de geração. **Relação:** junto com temperatura e `torch.multinomial`, atua sobre a saída `[B,V]` da Language Model Head; `k=1` equivale a selecionar sempre o melhor candidato.
+
+## Capítulo 5 — Pretraining on Unlabeled Data
+
+### Treinamento (Training)
+
+Processo de ajustar os parâmetros do modelo a partir de dados. No GPT, cada janela de texto fornece os tokens de entrada e seus alvos deslocados. A função de perda mede a previsão, a retropropagação calcula gradientes e o otimizador atualiza os pesos.
+
+### Época (Epoch)
+
+Uma passagem completa pelos lotes do conjunto de treinamento. A Sprint 5 avalia as perdas de treino e validação ao fim de cada época. A época zero identifica a avaliação dos pesos iniciais.
+
+### Lote (Batch)
+
+Grupo de exemplos processados juntos em uma passagem direta. Cada lote do GPT contém duas matrizes `[B,T]`, uma de entradas e outra de alvos. Durante o treinamento, a perda desse lote fornece o gradiente para um passo do otimizador.
+
+### Tamanho do lote (Batch Size)
+
+Número de exemplos agrupados por lote, representado por `B`. Um lote maior reúne mais previsões por atualização e, com um conjunto fixo, tende a reduzir o número de passos por época. O último lote pode ter menos exemplos.
+
+### Taxa de aprendizado (Learning Rate)
+
+Hiperparâmetro que escala o passo de atualização do otimizador. Taxas altas podem tornar o treino instável, e taxas baixas podem retardar a queda da perda. No AdamW, a taxa escala uma atualização calculada a partir dos gradientes e do estado do otimizador.
+
+### Função de perda (Loss Function)
+
+Função que quantifica o erro de previsão em relação ao alvo. No GPT, a perda fornece o valor escalar usado na retropropagação e permite comparar o desempenho entre épocas. A Sprint 5 usa a entropia cruzada para medir o erro na previsão do próximo token.
+
+### Perda de entropia cruzada (Cross-Entropy Loss)
+
+Para um alvo representado por um ID, é o negativo do logaritmo da probabilidade atribuída ao token correto. A perda média diminui quando o GPT atribui mais probabilidade aos próximos tokens esperados. `cross_entropy` recebe os logits e os IDs-alvo diretamente e calcula internamente o log-softmax.
+
+### Perplexidade (Perplexity)
+
+Exponencial da perda média de entropia cruzada por token, calculada em logaritmo natural. Resume a incerteza do modelo em uma escala em que valores menores indicam melhores previsões. A comparação depende do mesmo tokenizador, vocabulário e protocolo de avaliação.
+
+### Retropropagação (Backpropagation)
+
+Aplicação da regra da cadeia para calcular as derivadas da perda em relação aos parâmetros. A chamada `loss.backward()` propaga gradientes da saída do GPT até as camadas anteriores. O otimizador usa esses gradientes para calcular a próxima atualização.
+
+### Gradiente (Gradient)
+
+Conjunto de derivadas que mede como a perda varia com cada parâmetro. No PyTorch, `backward()` acumula gradientes em `.grad` e `optimizer.zero_grad()` limpa a acumulação antes do próximo lote. O AdamW usa estimativas construídas a partir desses gradientes para ajustar os pesos.
+
+### Otimizador (Optimizer)
+
+Algoritmo que define como atualizar os parâmetros a partir dos gradientes. No laço de treino, `optimizer.step()` aplica a atualização calculada após a retropropagação. O estado do otimizador pode guardar informações de passos anteriores para continuar o treinamento.
+
+### Adam com decaimento de pesos desacoplado (AdamW)
+
+Otimizador que estima médias móveis dos gradientes e de seus quadrados, aplicando o decaimento de pesos separadamente da atualização adaptativa. A taxa de aprendizado escala a atualização e `weight_decay` controla a regularização. O checkpoint guarda as estimativas do AdamW junto com os pesos do GPT.
+
+### Conjunto de treinamento (Training Set)
+
+Porção do corpus usada para ajustar os pesos. Na Sprint 5, o primeiro trecho do texto define o vocabulário e fornece as janelas de entrada e alvo para o otimizador. Uma passagem em modo de avaliação sobre esse trecho permite medir a perda de treino sem dropout.
+
+### Conjunto de validação (Validation Set)
+
+Porção reservada para medir o desempenho em exemplos fora do ajuste. Na Sprint 5, ela é extraída antes da montagem das janelas e tokenizada com o vocabulário do treino. Sua perda pode indicar se uma melhora no treino também se observa no trecho reservado.
+
+### Sobreajuste (Overfitting)
+
+Ocorre quando o modelo se ajusta a particularidades do treino com prejuízo ao desempenho em dados novos. Um sinal é a perda de treino continuar caindo enquanto a de validação aumenta. A diferença entre as perdas deve ser interpretada considerando o tamanho e a composição dos conjuntos.
+
+### Subajuste (Underfitting)
+
+Ocorre quando o modelo aprende poucos dos padrões relevantes, inclusive no conjunto de treinamento. Perdas elevadas em treino e validação podem indicar subajuste. Capacidade do modelo, taxa de aprendizado e quantidade de atualizações influenciam esse diagnóstico.
+
+### Convergência do modelo (Model Convergence)
+
+Estabilização do processo de otimização, observável quando passos adicionais passam a produzir variações pequenas na perda ou nos parâmetros. O histórico por época ajuda a identificar essa tendência. A validação indica se a estabilização do treino também corresponde a um desempenho estável no trecho reservado.
+
+### Inferência (Inference)
+
+Uso dos pesos ajustados para produzir previsões, como completar um texto a partir de um prompt. Na Sprint 5, `model.eval()` desativa o dropout e `torch.no_grad()` desativa o cálculo de gradientes durante a geração. A inferência pode começar pela leitura de um checkpoint.
+
+### Pontuações antes da normalização (Logits)
+
+Valores reais produzidos pela camada de saída para cada item do vocabulário. No treinamento, os logits `[B,T,V]` são reorganizados em `[B*T,V]` para a entropia cruzada. Na geração, os logits da última posição orientam a seleção do próximo token.
+
+### Função exponencial normalizada (Softmax)
+
+Transforma um vetor de logits em probabilidades que somam 1. Na geração, fornece a distribuição para amostragem depois de aplicar a temperatura ou o filtro top-k. Na perda de entropia cruzada, a operação correspondente em escala logarítmica integra o cálculo da perda.
+
+### Decodificação gulosa (Greedy Decoding)
+
+Seleção do token com maior pontuação a cada passo. O `argmax` dos logits fornece a mesma escolha que o `argmax` das probabilidades. A repetição de escolhas locais pode formar ciclos durante a geração autoregressiva.
+
+### Temperatura (Temperature)
+
+Divisor positivo aplicado aos logits antes do softmax. Temperaturas menores concentram probabilidade nos candidatos mais bem pontuados e temperaturas maiores aumentam o peso relativo das opções menos prováveis. A amostragem usa essa distribuição para escolher o próximo ID.
+
+### Amostragem entre os k melhores (Top-k Sampling)
+
+Estratégia de geração que seleciona os `k` maiores logits e sorteia o próximo token entre esses candidatos. O softmax redistribui as probabilidades sobre as opções mantidas. O filtro pode ser combinado com temperatura sobre os logits do mesmo GPT treinado.
+
+### Ponto de salvamento (Checkpoint)
+
+Arquivo com os estados e metadados necessários para recuperar o modelo. O checkpoint da Sprint 5 inclui pesos, arquitetura, vocabulário, parâmetros de treino, época e estado do AdamW. A carga reconstrói a associação entre IDs, embeddings e saídas antes da inferência.
+
+### Pesos do modelo (Model Weights)
+
+Parâmetros aprendidos pelas camadas do GPT, incluindo embeddings, projeções e escalas de normalização. Eles são atualizados pelo otimizador e determinam os logits produzidos para cada contexto. O `state_dict` guarda esses parâmetros e os buffers persistentes necessários para reconstruir o estado do modelo.

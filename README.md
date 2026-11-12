@@ -25,7 +25,9 @@ Para manter a organização e acompanhar a evolução do projeto, os artefatos e
 
 Na Sprint 3, `src/attention.py` implementa manualmente Self-Attention, Scaled Dot-Product Attention, Causal Attention e Multi-Head Attention. Os experimentos e heatmaps correspondentes estão em `/experimentos`.
 
-Na Sprint 4, `src/transformer.py` implementa LayerNorm, FeedForward e Transformer Block; `src/gpt.py` monta o modelo GPT e `src/generation.py` executa a geração autoregressiva. Veja [documentação](docs/sprint4_arquitetura.md) e execute `python src/demo_sprint4.py` e `python experimentos/sprint4_experimentos.py`. O modelo ainda **não foi treinado**.
+Na Sprint 4, `src/transformer.py` implementa LayerNorm, FeedForward e Transformer Block. `src/gpt.py` monta o GPT e `src/generation.py` executa a geração autoregressiva. As demonstrações dessa sprint usam pesos iniciais e podem ser executadas com `python src/demo_sprint4.py` e `python experimentos/sprint4_experimentos.py`. [Documentação da Sprint 4](docs/sprint4_arquitetura.md)
+
+Na Sprint 5, o mesmo GPT é treinado no corpus local para prever o próximo token. A implementação registra entropia cruzada e perplexidade, compara três configurações de treino e gera texto a partir dos checkpoints. [Documentação e resultados da Sprint 5](docs/sprint5_treinamento.md)
 
 
 ### 📚 Glossário Técnico
@@ -43,7 +45,7 @@ O glossário será atualizado de forma cumulativa ao longo das Sprints.
 - [X] **Sprint 2:** Tokenização, vocabulário, Token IDs, Embeddings e preparação dos dados (Capítulo 2).
 - [X] **Sprint 3:** Mecanismos de Attention (Self-Attention, Causal Attention e Multi-Head Attention) (Capítulo 3).
 - [X] **Sprint 4:** Arquitetura GPT e Transformer Blocks (Capítulo 4).
-- [ ] **Sprint 5:** Treinamento do modelo, função de perda e otimizadores (Capítulo 5).
+- [X] **Sprint 5:** Treinamento, avaliação, geração de texto e checkpoints (Capítulo 5).
 - [ ] **Sprint 6:** Fine-Tuning e adaptação para tarefas específicas (Capítulos 6 e 7).
 
 ## 🛠️ Tecnologias e Ambiente
@@ -51,3 +53,17 @@ O glossário será atualizado de forma cumulativa ao longo das Sprints.
 * **Linguagem:** Python 3.x
 * **Framework:** PyTorch
 * **Controle de Versão:** Git / GitHub
+
+## Executar a Sprint 5
+
+Na raiz do repositório, em um ambiente Python 3.12, instale as dependências e execute os experimentos em CPU. O comando dos experimentos grava as métricas, o gráfico, as amostras de texto e os checkpoints de A, B e C.
+
+```bash
+python -m pip install -r requirements.txt
+python -m pytest -q
+python -m experimentos.sprint5_experimentos --device cpu
+python -m src.evaluation --checkpoint experimentos/resultados_sprint5/checkpoints/C.pt --device cpu
+python -m src.generation --checkpoint experimentos/resultados_sprint5/checkpoints/C.pt --device cpu
+```
+
+Para treinar um modelo com configuração própria, use `python -m src.training --help`. Consulte o guia técnico para o protocolo, as opções e a interpretação dos resultados. [Guia da Sprint 5](docs/sprint5_treinamento.md)
