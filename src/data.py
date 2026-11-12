@@ -2,10 +2,23 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, List
 
 import torch
 from torch.utils.data import DataLoader, Dataset
+
+
+DEFAULT_CORPUS = Path(__file__).resolve().parents[1] / "data" / "texto_teste.txt"
+
+
+def split_corpus(text: str, train_fraction: float) -> tuple[str, str]:
+    """Divide o corpus em trechos contíguos antes da tokenização e das janelas."""
+    if not 0 < train_fraction < 1:
+        raise ValueError("train_fraction deve estar entre 0 e 1.")
+    words = text.split()
+    boundary = int(len(words) * train_fraction)
+    return " ".join(words[:boundary]), " ".join(words[boundary:])
 
 
 def encode_text(tokenizer: Any, text: str) -> List[int]:
@@ -60,6 +73,7 @@ def create_dataloader_v1(
     shuffle: bool = True,
     drop_last: bool = True,
     num_workers: int = 0,
+    generator: torch.Generator | None = None,
 ) -> DataLoader:
     """Organiza o Dataset em lotes prontos para o treinamento."""
     dataset = GPTDatasetV1(text, tokenizer, max_length=max_length, stride=stride)
@@ -70,4 +84,5 @@ def create_dataloader_v1(
         shuffle=shuffle,
         drop_last=drop_last,
         num_workers=num_workers,
+        generator=generator,
     )
