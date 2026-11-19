@@ -4,3 +4,6 @@ numpy
 pytest
 jupyter
 matplotlib
+
+transformers>=4.40,<5
+requests

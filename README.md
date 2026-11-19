@@ -67,3 +67,23 @@ python -m src.generation --checkpoint experimentos/resultados_sprint5/checkpoint
 ```
 
 Para treinar um modelo com configuração própria, use `python -m src.training --help`. Consulte o guia técnico para o protocolo, as opções e a interpretação dos resultados. [Guia da Sprint 5](docs/sprint5_treinamento.md)
+
+
+## Sprint 6 — Resultados parciais e finalidade do projeto
+
+Nesta etapa, a equipe carregou os pesos publicos do GPT-2 na arquitetura propria implementada nas Sprints anteriores. A comparacao com um modelo de pesos aleatorios mostrou uma geracao textual qualitativamente mais coerente com os pesos pre-treinados.
+
+**Classificacao de spam (Capitulo 6): experimento academico, nao aplicacao final.** Foi realizado fine-tuning supervisionado sobre a SMS Spam Collection, com 3.609 mensagens de treino, 773 de validacao e 775 de teste. A avaliacao independente registrou **99,48% de acuracia** e **97,94% de F1-score para spam** (676 verdadeiros negativos, 95 verdadeiros positivos, dois falsos positivos e dois falsos negativos). Uma mensagem em portugues sobre premio foi incorretamente classificada como nao spam, indicando uma limitacao observada fora do conjunto em ingles.
+
+**Aplicacao pretendida:** assistente educativo para responder perguntas medicas simples, a ser desenvolvido por meio de *instruction fine-tuning* (Capitulo 7). Esse treinamento e sua avaliacao ainda estao pendentes. O modelo nao deve ser tratado como ferramenta de diagnostico.
+
+- [Analise experimental e resultados da Sprint 6](experimentos/analise_sprint6.md)
+- [Documentacao tecnica da Sprint 6](docs/sprint6_finetuning.md)
+- [Metricas reais da classificacao (JSON)](experimentos/resultados_sprint6/classificacao/metrics_classification.json)
+
+Comandos de reproducao da classificacao:
+
+```bash
+python -m src.download_sms_data
+python -m src.finetune_classification --data data/SMSSpamCollection --epochs 3 --batch-size 4 --device cpu
+```

@@ -380,3 +380,79 @@ Arquivo com os estados e metadados necessários para recuperar o modelo. O check
 ### Pesos do modelo (Model Weights)
 
 Parâmetros aprendidos pelas camadas do GPT, incluindo embeddings, projeções e escalas de normalização. Eles são atualizados pelo otimizador e determinam os logits produzidos para cada contexto. O `state_dict` guarda esses parâmetros e os buffers persistentes necessários para reconstruir o estado do modelo.
+
+---
+
+## Sprint 6 - Fine-tuning e adaptacao de modelos (Capitulos 6 e 7)
+
+### Ajuste fino (Fine-Tuning)
+
+Processo de continuar o treinamento de um modelo ja pre-treinado usando exemplos de uma tarefa-alvo. Parte dos parametros pode permanecer congelada, enquanto os parametros selecionados sao atualizados para melhorar o desempenho nessa tarefa.
+
+### Pesos pre-treinados (Pretrained Weights)
+
+Tensores de parametros obtidos em um treinamento anterior, normalmente em grandes corpus de texto. O seu carregamento exige correspondencia das dimensoes, camadas e IDs do tokenizador com a arquitetura de destino. No GPT-2, os pesos das projecoes da atencao precisam ser separados e transpostos para a implementacao didatica em PyTorch.
+
+### Aprendizado por transferencia (Transfer Learning)
+
+Reutilizacao de representacoes ja aprendidas por um modelo em outra tarefa ou conjunto de dados. O fine-tuning e uma forma de transfer learning: parte do conhecimento geral do pre-treinamento e adaptada a um objetivo mais especifico.
+
+### Ajuste fino para classificacao (Classification Fine-Tuning)
+
+Adaptacao do GPT para selecionar uma categoria discreta, por exemplo, spam ou nao spam. Uma camada de saida para duas classes substitui a tarefa de prever o proximo token como objetivo do treinamento.
+
+### Ajuste fino para instrucoes (Instruction Fine-Tuning)
+
+Treinamento adicional que ensina o modelo a continuar um prompt composto por instrucao, entrada opcional e marcador de resposta, visando produzir a resposta esperada. Diferentemente da classificacao, a saida continua sendo uma sequencia de tokens gerados.
+
+### Cabeca de classificacao (Classification Head)
+
+Camada linear treinavel que transforma uma representacao oculta do GPT em logits de classes. Na classificacao de SMS, a cabeca tem duas saidas, e a classe prevista corresponde ao maior logit.
+
+### Camadas congeladas (Frozen Layers)
+
+Camadas cujos parametros tem `requires_grad=False` e, portanto, nao sao atualizados pelo otimizador. O congelamento preserva parte das representacoes gerais do modelo e reduz o custo de treinamento.
+
+### Parametros treinaveis (Trainable Parameters)
+
+Pesos e vieses com gradientes habilitados, incluidos no processo de otimizacao. Na Sprint 6, apenas o ultimo bloco Transformer, a normalizacao final e a cabeca apropriada a cada tarefa sao treinados por padrao.
+
+### Ajuste fino supervisionado (Supervised Fine-Tuning - SFT)
+
+Etapa de treinamento com pares de entradas e respostas de referencia. A perda mede o desvio entre as saidas previstas e os alvos supervisionados. Em instruction SFT, os tokens do prompt e do padding podem ser ignorados no calculo da perda.
+
+### Conjunto de instrucoes (Instruction Dataset)
+
+Colecao de exemplos estruturados com `instruction`, `input` opcional e `output` esperado. Esses campos sao convertidos para um prompt padronizado e uma sequencia de tokens de resposta para o treinamento supervisionado.
+
+### Lote de treinamento (Training Batch)
+
+Grupo de exemplos processados simultaneamente em uma iteracao do otimizador. Sequencias de tamanhos diferentes recebem padding; as posicoes artificiais nao devem contribuir para a perda ou alterar a posicao do ultimo token real usado na classificacao.
+
+### Acuracia de classificacao (Classification Accuracy)
+
+Proporcao de exemplos corretamente classificados: `(verdadeiros positivos + verdadeiros negativos) / numero total de exemplos`. Deve ser medida em dados nao usados no ajuste dos pesos e considerada junto de precisao, revocacao e F1 em bases desbalanceadas.
+
+### Conjunto de avaliacao (Evaluation Dataset)
+
+Subconjunto separado do treinamento e, idealmente, da escolha de hiperparametros. Na Sprint 6, os dados sao divididos em treino, validacao e teste; o teste so e avaliado apos escolher o checkpoint pela validacao.
+
+### Avaliacao de respostas (Response Evaluation)
+
+Analise da qualidade das respostas geradas por um modelo ajustado para instrucoes, comparando com respostas esperadas em exemplos nao vistos. Pode combinar medidas quantitativas, como perda por token de resposta, com inspecao qualitativa de correcoes, relevancia e completude.
+
+### Precisao de classificacao (Precision)
+
+Entre os exemplos previstos como spam, fracao que realmente e spam: `TP / (TP + FP)`. Uma precisao alta reduz alarmes falsos, mas nao garante que todos os spams sejam identificados.
+
+### Revocacao (Recall)
+
+Entre os exemplos que realmente sao spam, fracao detectada pelo modelo: `TP / (TP + FN)`. Uma revocacao alta reduz spams nao detectados, podendo aumentar falsos positivos.
+
+### Pontuacao F1 (F1-Score)
+
+Media harmonica entre precisao e revocacao: `2 * precisao * revocacao / (precisao + revocacao)`. Resume a relacao entre as duas metricas e e especialmente informativa quando as classes sao desbalanceadas.
+
+### Mascaramento da perda (Loss Masking)
+
+Uso de um valor especial de alvo, como `-100` no `CrossEntropyLoss` do PyTorch, para ignorar posicoes especificas. Na tarefa de instrucoes, mascara tokens do prompt e do padding, concentrando o gradiente na previsao dos tokens da resposta.

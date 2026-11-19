@@ -1,0 +1,12 @@
+[
+ {"instruction":"Convert the word hello to uppercase.","input":"","output":"HELLO"},
+ {"instruction":"What is 2 + 2?","input":"","output":"4"},
+ {"instruction":"Translate to English.","input":"Bom dia","output":"Good morning"},
+ {"instruction":"Classify the sentiment as positive or negative.","input":"I loved this book.","output":"positive"},
+ {"instruction":"Complete the sequence.","input":"1, 2, 3","output":"4"},
+ {"instruction":"Convert the word world to uppercase.","input":"","output":"WORLD"},
+ {"instruction":"What is the opposite of hot?","input":"","output":"cold"},
+ {"instruction":"What is 3 + 5?","input":"","output":"8"},
+ {"instruction":"Translate to English.","input":"Obrigado","output":"Thank you"},
+ {"instruction":"Classify the sentiment as positive or negative.","input":"This experience was terrible.","output":"negative"}
+]

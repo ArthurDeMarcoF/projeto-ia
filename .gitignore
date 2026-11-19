@@ -5,3 +5,14 @@ venv/
 .ipynb_checkpoints/
 .DS_Store
 *.pt
+
+# Ambiente virtual da Sprint 6
+.venv_sprint6/
+
+# Arquivos temporarios de instalacao
+sprint6_revisada/
+
+# Backup local do modelo treinado
+backup_classificacao_sprint6/
+# Pacote temporario de documentacao
+sprint6_documentacao_pronta/
